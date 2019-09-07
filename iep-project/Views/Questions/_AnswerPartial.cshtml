@@ -1,0 +1,33 @@
+﻿@model iep_project.Models.Answer
+
+<div class="panel panel-info">
+    <div class="panel-heading">
+        @Html.DisplayFor(model => model.ApplicationUser.Name)
+    </div>
+    <div class="panel-body">
+        @if (Model.ParentAnswer != null)
+        {
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                @Html.DisplayFor(model => model.ParentAnswer.ApplicationUser.Name)
+            </div>
+            <div class="panel-body">
+                @Html.DisplayFor(model => model.ParentAnswer.Text)
+            </div>
+            <div class="panel-footer">
+                @Html.DisplayFor(model => model.ParentAnswer.Created)
+            </div>
+        </div>
+        }
+        @Html.DisplayFor(model => model.Text)
+    </div>
+    <div class="panel-footer">
+        @Html.DisplayFor(model => model.Created)
+        @Html.ActionLink("Reply", "CreateAnswer", new { QuestionId = Model.QuestionId, AnswerId = Model.Id })
+        @if (User.Identity.Name == Model.ApplicationUser.UserName || User.IsInRole("Admin"))
+        {
+            @Html.ActionLink("Delete", "DeleteAnswer", new { AnswerId = Model.Id })
+        }
+
+    </div>
+</div>

@@ -52,6 +52,13 @@ namespace iep_project.Controllers
             }
         }
 
+        public ApplicationDbContext DbContext
+        {
+            get
+            {
+                return HttpContext.GetOwinContext().Get<ApplicationDbContext>();
+            }
+        }
         //
         // GET: /Account/Login
         [AllowAnonymous]
@@ -73,9 +80,17 @@ namespace iep_project.Controllers
                 return View(model);
             }
 
+            ApplicationUser user = UserManager.Find<ApplicationUser, string>(model.Email, model.Password);
+            if (user != null && user.Active == false)
+            {
+                ModelState.AddModelError("", "Account deactivated.");
+                return View(model);
+            }
+
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
             var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
+            
             switch (result)
             {
                 case SignInStatus.Success:

@@ -7,15 +7,27 @@ namespace iep_project.Migrations
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
     using System.Linq;
+    using System.Security.Claims;
 
-    internal sealed class Configuration : DbMigrationsConfiguration<iep_project.Models.ApplicationDbContext>
+    
+
+    internal sealed class Configuration : DbMigrationsConfiguration<ApplicationDbContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
         }
 
-        protected override void Seed(iep_project.Models.ApplicationDbContext context)
+        protected override void Seed(ApplicationDbContext context)
+        {
+            this.SeedRoles(context);
+
+            this.SeedUsers(context);
+
+            this.SeedCategories(context);
+        }
+
+        private void SeedRoles(ApplicationDbContext context)
         {
             var roleStore = new RoleStore<IdentityRole>(context);
             var roleManager = new RoleManager<IdentityRole>(roleStore);
@@ -25,19 +37,64 @@ namespace iep_project.Migrations
             {
                 if (!roleManager.RoleExists(role)) roleManager.Create(new IdentityRole { Name = role });
             }
+        }
 
-                          
+        private class ApplicationUserSeed
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
+            public string Name { get; set; }
+            public string Role { get; set; }
+        }
+
+        private void SeedUsers(ApplicationDbContext context)
+        {
             var userStore = new UserStore<ApplicationUser>(context);
             var userManager = new UserManager<ApplicationUser>(userStore);
-            string email = "kosta.bizetic@gmail.com";
-            string password = "Pass123$";
-            var hash = new PasswordHasher();
-            var user = new ApplicationUser { UserName = email, Email = email, Name = "Kosta"};
-            if (!context.Users.Any(u => u.UserName == email))
+
+            ApplicationUserSeed[] userSeeds = {
+                new ApplicationUserSeed {
+                    Email = "kosta.bizetic@gmail.com",
+                    Password = "Pass123$",
+                    Name = "Kosta",
+                    Role = "Admin" },
+                new ApplicationUserSeed {
+                    Email = "u@u.com",
+                    Password = "Pass123$",
+                    Name = "User",
+                    Role = "User" },
+                new ApplicationUserSeed {
+                    Email = "a@a.com",
+                    Password = "Pass123$",
+                    Name = "Agent",
+                    Role = "Agent" }
+            };
+
+            foreach (ApplicationUserSeed userSeed in userSeeds)
             {
-                userManager.Create(user, password);
-                userManager.AddToRole(user.Id, "Admin");
-            }    
+                if (!context.Users.Any(u => u.UserName == userSeed.Email))
+                {
+                    var user = new ApplicationUser { UserName = userSeed.Email, Email = userSeed.Email, Name = userSeed.Name };
+                    userManager.Create(user, userSeed.Password);
+                    userManager.AddToRole(user.Id, userSeed.Role);
+                };
+            }
+        }
+
+        private void SeedCategories(ApplicationDbContext context)
+        {
+            Category[] categories = new Category[] {
+                new Category { CategoryName = "Category1" },
+                new Category { CategoryName = "Category2" },
+                new Category { CategoryName = "Category4" }};
+
+            foreach (Category category in categories)
+            {
+                if (!context.Categories.Any(c => c.CategoryName == category.CategoryName))
+                {
+                    context.Categories.Add(category);
+                }
+            }
         }
     }
 }

@@ -1,0 +1,44 @@
+﻿@model iep_project.Models.Answer
+
+@{
+    ViewBag.Title = "Create Anwser";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<div class="panel panel-info">
+    <div class="panel-body">
+        @using (Html.BeginForm("CreateAnswer", "Questions", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+        <div class="form-horizontal">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="form-group col-lg-12">
+                <input type="hidden" name="QuestionId" value="@ViewBag.QuestionId">
+            </div>
+
+            <div class="form-group col-lg-12">
+                <input type="hidden" name="AnswerId" value="@ViewBag.AnswerId">
+            </div>
+
+            <div class="form-group col-lg-12">
+                @Html.TextAreaFor(model => model.Text, new { @class = "form-control", @rows = 4, @style = "min-width: 100%" })
+            </div>
+
+            <div class="form-group col-lg-1">
+                @Html.ActionLink("Cancel", "Details", new { Id = ViewBag.QuestionId })
+            </div>
+
+            <div class="form-group col-lg-1">
+                <button type="submit" class="btn btn-primary">Post</button>
+            </div>
+        </div>
+          }
+        </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}

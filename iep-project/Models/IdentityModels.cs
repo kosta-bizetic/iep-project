@@ -1,4 +1,6 @@
-﻿using System.Data.Entity;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Data.Entity;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
@@ -10,6 +12,9 @@ namespace iep_project.Models
     public class ApplicationUser : IdentityUser
     {
         public string Name { get; set; }
+        [DisplayName("Number of tokens")]
+        public int NumberOfTokens { get; set; } = 0;
+        public bool Active { get; set; } = true;
 
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
@@ -31,5 +36,17 @@ namespace iep_project.Models
         {
             return new ApplicationDbContext();
         }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            // modelBuilder.Entity<Answer>().HasOptional(a => a.ParentAnswer).WithMany(a => a.ChildAnswers).HasForeignKey(a => a.AnswerId).WillCascadeOnDelete(true);
+        }
+
+        public System.Data.Entity.DbSet<iep_project.Models.Question> Questions { get; set; }
+
+        public System.Data.Entity.DbSet<iep_project.Models.Category> Categories { get; set; }
+
+        public System.Data.Entity.DbSet<iep_project.Models.Answer> Answers { get; set; }
     }
 }

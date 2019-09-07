@@ -1,0 +1,55 @@
+﻿@model iep_project.Models.Question
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>
+        @if (Model.Locked) { 
+            @Html.Raw("[Locked]")
+        }
+        @Html.DisplayFor(model => model.Title)
+</h2>
+
+<h4>@Html.DisplayFor(model => model.Category.CategoryName)</h4>
+
+<br />
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        
+        @Html.DisplayFor(model => model.ApplicationUser.Name)
+    </div>
+    <div class="panel-body">
+        @Html.DisplayFor(model => model.Text)
+    </div>
+    <div class="panel-footer">
+        @Html.DisplayFor(model => model.Created)
+        @Html.ActionLink("Reply", "CreateAnswer", new { QuestionId = Model.Id })
+        @if (Model.Locked == false && User.Identity.Name == Model.ApplicationUser.UserName)
+        {
+
+            @Html.ActionLink("Lock", "Lock", new { QuestionId = Model.Id })
+        }
+        @if (Model.Locked == true && (User.IsInRole("Admin") || User.IsInRole("Agent")))
+        {
+            @Html.ActionLink("Unlock", "Unlock", new { QuestionId = Model.Id })
+        }
+        @if (User.Identity.Name == Model.ApplicationUser.UserName || User.IsInRole("Admin"))
+        {
+            @Html.ActionLink("Delete", "Delete", new { Id = Model.Id })
+        }
+    </div>
+</div>
+
+@{
+    foreach (iep_project.Models.Answer answer in ViewBag.Answers)
+    {
+        Html.RenderPartial("_AnswerPartial", answer);
+    }
+}
+
+<p>
+    @Html.ActionLink("Back to List", "Index")
+</p>

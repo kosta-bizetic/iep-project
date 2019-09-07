@@ -1,0 +1,55 @@
+﻿@model iep_project.Models.Answer
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    @{
+            iep_project.Models.Answer answer = (iep_project.Models.Answer) Model;
+
+
+            <div class="panel panel-info">
+                <div class="panel-heading">
+                    @Html.DisplayFor(model => model.ApplicationUser.Name)
+                </div>
+                <div class="panel-body">
+                    @if (Model.ParentAnswer != null)
+                    {
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                @Html.DisplayFor(model => model.ParentAnswer.ApplicationUser.Name)
+                            </div>
+                            <div class="panel-body">
+                                @Html.DisplayFor(model => model.ParentAnswer.Text)
+                            </div>
+                            <div class="panel-footer">
+                                @Html.DisplayFor(model => model.ParentAnswer.Created)
+                            </div>
+                        </div>
+                    }
+                    @Html.DisplayFor(model => model.Text)
+                </div>
+                <div class="panel-footer">
+                    @Html.DisplayFor(model => model.Created)
+                </div>
+            </div>
+
+
+            <div class="form-group col-lg-1">
+                @Html.ActionLink("Cancel", "Details", new { Id = Model.QuestionId })
+            </div>
+            using (Html.BeginForm("DeleteAnswer", "Questions", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <input type="hidden" name="AnswerId" value="@Model.Id" />
+                    <input type="submit" value="Delete" class="btn btn-danger" />
+                 </div>
+            }
+    }
+</div>
