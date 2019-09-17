@@ -5,6 +5,7 @@ using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 using iep_project.Models;
@@ -21,14 +22,40 @@ namespace iep_project.Controllers
         }
 
         // GET: Questions
-        public ActionResult Index()
+        public ActionResult Index(string Search = "", int CategoryId = -1, Boolean usersPosts = false, int Page = 1)
         {
-            var questions = db.Questions.Include(q => q.Category).Include(q => q.ApplicationUser);
+            var questions = db.Questions.Include(q => q.ApplicationUser).Include(q => q.Category);
+
+            if (usersPosts)
+            {
+                questions = questions.Where(q => q.ApplicationUser.UserName == User.Identity.Name);
+            }
+            if (CategoryId != -1)
+            {
+                questions = questions.Where(q => q.CategoryId == CategoryId);
+            }
+            questions = questions.Where(q => q.Title.Contains(Search)).OrderByDescending(q => q.Created);
+            int pageNumber = (int)Math.Ceiling((double)questions.Count() / 5);
+            if (pageNumber == 0) pageNumber = 1;
+            if (Page < 1 || Page > pageNumber)
+            {
+                return HttpNotFound();
+            }
+            questions = questions.Skip((Page - 1) * 5).Take(5);
+
+            Category allCategories = new Category { Id = -1, CategoryName = "All Categories" };
+            var selectList = new List<Category>();
+            selectList.Add(allCategories);
+            selectList.AddRange(db.Categories.ToList());
+            ViewBag.CategoryId = new SelectList(selectList, "Id", "CategoryName", allCategories);
+            ViewBag.usersPosts = usersPosts;
+            ViewBag.PageNumber = pageNumber;
+            ViewBag.Page = Page;
             return View(questions.ToList());
         }
 
         // GET: Questions/Details/5
-        public ActionResult Details(Guid? id)
+        public ActionResult Details(Guid? id, string message = "")
         {
             if (id == null)
             {
@@ -40,6 +67,7 @@ namespace iep_project.Controllers
             {
                 return HttpNotFound();
             }
+            ViewBag.Message = message;
             return View(question);
         }
 
@@ -68,7 +96,7 @@ namespace iep_project.Controllers
                 fileName = Path.GetFileNameWithoutExtension(question.ImageFile.FileName);
                 string extension = Path.GetExtension(question.ImageFile.FileName);
                 fileName = fileName + DateTime.Now.ToString("yymmssfff") + extension;
-                question.ImagePath = @"~\Images\" + fileName;
+                question.ImagePath = @"~/Images/" + fileName;
                 fileName = Path.Combine(Server.MapPath("~/Images/"), fileName);
             }
             
@@ -83,7 +111,7 @@ namespace iep_project.Controllers
                 }
                 return RedirectToAction("Index");
             }
-
+            
             ViewBag.CategoryId = new SelectList(db.Categories, "Id", "CategoryName", question.CategoryId);
             return View(question);
         }
@@ -146,7 +174,7 @@ namespace iep_project.Controllers
             {
                 db.Questions.Remove(question);
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return RedirectToAction("Index", new { Page = 1} );
             }
             
             return HttpNotFound();
@@ -169,13 +197,20 @@ namespace iep_project.Controllers
             answer.Created = DateTime.Now;
             answer.ApplicationUserId = db.Users.Where(u => u.UserName == User.Identity.Name).First().Id;
             Guid id = Guid.NewGuid();
-            
-            if (ModelState.IsValid)
+
+            Question question = this.getQuestionById(answer.QuestionId);
+
+            if (ModelState.IsValid && !question.Locked)
             {
+                
+                question.NumberOfAnswers++;
                 answer.Id = id;
                 db.Answers.Add(answer);
                 db.SaveChanges();
                 return RedirectToAction("Details", new { Id = answer.QuestionId});
+            } else if (question.Locked)
+            {
+                return RedirectToAction("Details", new { Id = answer.QuestionId, Message = "The question is locked!" });
             }
 
             return RedirectToAction("Details", new { Id = answer.QuestionId });
@@ -188,6 +223,7 @@ namespace iep_project.Controllers
             if (User.Identity.Name == question.ApplicationUser.UserName && question.Locked == false)
             {
                 question.Locked = true;
+                question.LastLocked = DateTime.Now;
                 db.SaveChanges();
                 return RedirectToAction("Details", new { Id = QuestionId });
             }
@@ -228,11 +264,16 @@ namespace iep_project.Controllers
         public ActionResult DeleteAnswerConfirmed(Guid AnswerId)
         {
             Answer answer = db.Answers.Include(a => a.ApplicationUser).Where(a => a.Id == AnswerId).First();
-            if (User.Identity.Name == answer.ApplicationUser.UserName || User.IsInRole("Admin"))
+            Question question = this.getQuestionById(answer.QuestionId);
+            if ((User.Identity.Name == answer.ApplicationUser.UserName && !question.Locked) || User.IsInRole("Admin"))
             {
+                question.NumberOfAnswers--;
                 db.Answers.Remove(answer);
                 db.SaveChanges();
                 return RedirectToAction("Details", new { Id = answer.QuestionId });
+            } else if (User.Identity.Name == answer.ApplicationUser.UserName && question.Locked)
+            {
+                return RedirectToAction("Details", new { Id = answer.QuestionId, Message = "The question is locked!" });
             }
             return HttpNotFound();
         }

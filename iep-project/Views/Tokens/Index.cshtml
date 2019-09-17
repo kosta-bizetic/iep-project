@@ -1,0 +1,74 @@
+﻿@model IEnumerable<iep_project.Models.Order>
+@using iep_project.Models
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (ViewBag.Result == 1)
+{
+    <h1 class="text-danger">Your payment was unsuccessful :(</h1>
+}
+else if (ViewBag.Result == 2)
+{
+    <h1 class="text-success">Your payment was successful!</h1>
+}
+
+<h1>Number of tokens: @ViewBag.TokenCount</h1>
+
+@{
+    foreach (Offer offer in ViewBag.Offers)
+    {
+        <div class="col-md-4">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <h3 class="panel-title">
+                        @offer.Name Offer
+                    </h3>
+                </div>
+                <div class="panel-body">
+                    @Html.ActionLink("Buy", "Buy", new { Id = offer.Id }) @offer.Amount tokens for @offer.Price$.
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<h2>Orders</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Id)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Created)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Amount)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Price)
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Created)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Amount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+        </tr>
+    }
+
+</table>

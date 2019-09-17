@@ -1,5 +1,6 @@
 ﻿@model IEnumerable<iep_project.Models.Question>
-
+@using iep_project.Models
+@using System.Text.RegularExpressions
 @{
     ViewBag.Title = "Questions";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -7,9 +8,45 @@
 
 <h2>Questions</h2>
 
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
+@using (Html.BeginForm("Index", "Questions", FormMethod.Get))
+{
+    <div class="form-group">
+        <div class=" col-md-3">
+            @Html.TextBox("Search", "", new { @class = "form-control", @placeholder = "Search"})
+        </div>
+    </div>
+
+
+    <div class="form-group">
+        <div class="col-md-3">
+            @Html.DropDownList("CategoryId", (SelectList)ViewBag.CategoryId, htmlAttributes: new { @class = "form-control" })
+        </div>
+    </div>
+
+    if (User.Identity.IsAuthenticated)
+    {
+        <div class="form-group">
+            <div class="col-md-3">
+                <label>
+                    <input name="usersPosts" type="checkbox" value="True" @if (ViewBag.usersPosts) { @Html.Raw("checked") }> Show only my questions
+                </label>
+            </div>
+        </div>
+    }
+    <div class="form-group">
+        <div class="pull-right col-md-offset-2 col-md-1">
+            <button type="submit" class="btn ifn-primary">Apply</button>
+        </div>
+    </div>
+}
+
+<div class="col-md-10">
+    <p>
+        @Html.ActionLink("Create New", "Create")
+    </p>
+</div>
+
+
 <table class="table">
     <tr>
         <th>
@@ -19,26 +56,55 @@
             @Html.DisplayNameFor(model => model.ApplicationUser.Name)
         </th>
         <th>
-            Replies
+            @Html.DisplayNameFor(model => model.NumberOfAnswers)
         </th>
-        <th></th>
+        <th>
+            Action
+        </th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr @if (item.Locked) { @Html.Raw("class=\"active\""); } >
-        <td>
-            @Html.DisplayFor(modelItem => item.Title)
-        </td>
-        <td>
-            @Html.DisplayFor(model => item.ApplicationUser.Name)
-        </td>
-        <td>
-            
-        </td>
-        <td>
-            @Html.ActionLink("Open", "Details", new { id = item.Id })
-        </td>
-    </tr>
-}
+    @foreach (var item in Model)
+    {
+        <tr @if (item.Locked) { @Html.Raw("class=\"active\"") ; }>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.ApplicationUser.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.NumberOfAnswers)
+            </td>
+            <td>
+                @Html.ActionLink("Open", "Details", new { id = item.Id })
+            </td>
+        </tr>
+    }
 
 </table>
+
+<div class="col-md-offset-4 col-md-8">
+    <ul class="pagination ">
+        <li class="disabled"><a href="#">&laquo;</a></li>
+        @for (int i = 1; i <= ViewBag.PageNumber; i++)
+        {
+            string URI = HttpContext.Current.Request.Url.AbsoluteUri;
+
+            if (Regex.IsMatch(URI, "Page"))
+            {
+                URI = Regex.Replace(URI, @"Page=\d+", "Page="+i.ToString());
+            }
+            else if (Regex.IsMatch(URI, @"\?"))
+            {
+                URI += $"&Page={i}";
+            }
+            else
+            {
+                URI += $"?Page={i}";
+            }
+
+            <li @if (i == ViewBag.Page) { @Html.Raw("class=\"active\"") ; }><a href="@URI"> @i </a></li>
+        }
+        <li class="disabled"><a href="#">&raquo;</a></li>
+    </ul>
+</div>

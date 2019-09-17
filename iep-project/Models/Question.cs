@@ -33,6 +33,10 @@ namespace iep_project.Models
         public Boolean Locked { get; set; } = false;
 
         [ScaffoldColumn(false)]
+        [Display(Name = "Replies")]
+        public int NumberOfAnswers { get; set; } = 0;
+
+        [ScaffoldColumn(false)]
         public string ApplicationUserId { get; set; }
         [ForeignKey("ApplicationUserId")]
         public ApplicationUser ApplicationUser { get; set; }

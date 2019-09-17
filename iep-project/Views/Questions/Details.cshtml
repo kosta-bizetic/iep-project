@@ -5,6 +5,13 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+@if (ViewBag.Message != "")
+{
+    <h1 class="danger">
+        @Html.Raw(ViewBag.Message)
+    </h1>
+}
+
 <h2>
         @if (Model.Locked) { 
             @Html.Raw("[Locked]")
@@ -18,10 +25,13 @@
 
 <div class="panel panel-primary">
     <div class="panel-heading">
-        
         @Html.DisplayFor(model => model.ApplicationUser.Name)
     </div>
     <div class="panel-body">
+        @if (Model.ImagePath != "")
+        {
+            <img src="@Url.Content(Model.ImagePath)" class="center-block"/><br />
+        }
         @Html.DisplayFor(model => model.Text)
     </div>
     <div class="panel-footer">

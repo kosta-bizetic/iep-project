@@ -9,6 +9,7 @@ namespace iep_project
         public void Configuration(IAppBuilder app)
         {
             ConfigureAuth(app);
+            PayPalConfiguration.ConfigurePayPal();
         }
     }
 }

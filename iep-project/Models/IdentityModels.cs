@@ -48,5 +48,11 @@ namespace iep_project.Models
         public System.Data.Entity.DbSet<iep_project.Models.Category> Categories { get; set; }
 
         public System.Data.Entity.DbSet<iep_project.Models.Answer> Answers { get; set; }
+
+        public System.Data.Entity.DbSet<iep_project.Models.Offer> Offers { get; set; }
+
+        public System.Data.Entity.DbSet<iep_project.Models.Price> Prices { get; set; }
+
+        public System.Data.Entity.DbSet<iep_project.Models.Order> Orders { get; set; }
     }
 }

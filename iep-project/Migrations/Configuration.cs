@@ -3,6 +3,7 @@ namespace iep_project.Migrations
     using iep_project.Models;
     using Microsoft.AspNet.Identity;
     using Microsoft.AspNet.Identity.EntityFramework;
+    using PayPal.Api;
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Migrations;
@@ -12,7 +13,7 @@ namespace iep_project.Migrations
     
 
     internal sealed class Configuration : DbMigrationsConfiguration<ApplicationDbContext>
-    {
+    {            
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
@@ -21,10 +22,10 @@ namespace iep_project.Migrations
         protected override void Seed(ApplicationDbContext context)
         {
             this.SeedRoles(context);
-
             this.SeedUsers(context);
-
             this.SeedCategories(context);
+            this.SeedOffers(context);
+            this.SeedPrices(context);
         }
 
         private void SeedRoles(ApplicationDbContext context)
@@ -94,6 +95,32 @@ namespace iep_project.Migrations
                 {
                     context.Categories.Add(category);
                 }
+            }
+        }
+
+        private void SeedOffers(ApplicationDbContext context)
+        {
+            Offer[] offers = new Offer[]
+            {
+                new Offer { Name = "Silver", Amount = 10, Price = 10 },
+                new Offer { Name = "Gold", Amount = 100, Price = 80 },
+                new Offer { Name = "Platinium", Amount = 1000, Price = 600 }
+            };
+
+            foreach (Offer offer in offers)
+            {
+                if (!context.Offers.Any(o => o.Name == offer.Name))
+                {
+                    context.Offers.Add(offer);
+                }
+            }
+        }
+
+        private void SeedPrices(ApplicationDbContext context)
+        {
+            if (context.Prices.Count() == 0)
+            {
+                context.Prices.Add(new Price { Cost = 5 });
             }
         }
     }
