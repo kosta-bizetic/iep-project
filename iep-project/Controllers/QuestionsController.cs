@@ -1,14 +1,12 @@
-﻿using System;
+﻿using iep_project.Models;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text.RegularExpressions;
-using System.Web;
 using System.Web.Mvc;
-using iep_project.Models;
 
 namespace iep_project.Controllers
 {
@@ -99,7 +97,7 @@ namespace iep_project.Controllers
                 question.ImagePath = @"~/Images/" + fileName;
                 fileName = Path.Combine(Server.MapPath("~/Images/"), fileName);
             }
-            
+
             if (ModelState.IsValid)
             {
                 question.Id = Guid.NewGuid();
@@ -111,7 +109,7 @@ namespace iep_project.Controllers
                 }
                 return RedirectToAction("Index");
             }
-            
+
             ViewBag.CategoryId = new SelectList(db.Categories, "Id", "CategoryName", question.CategoryId);
             return View(question);
         }
@@ -174,9 +172,9 @@ namespace iep_project.Controllers
             {
                 db.Questions.Remove(question);
                 db.SaveChanges();
-                return RedirectToAction("Index", new { Page = 1} );
+                return RedirectToAction("Index", new { Page = 1 });
             }
-            
+
             return HttpNotFound();
         }
 
@@ -202,13 +200,14 @@ namespace iep_project.Controllers
 
             if (ModelState.IsValid && !question.Locked)
             {
-                
+
                 question.NumberOfAnswers++;
                 answer.Id = id;
                 db.Answers.Add(answer);
                 db.SaveChanges();
-                return RedirectToAction("Details", new { Id = answer.QuestionId});
-            } else if (question.Locked)
+                return RedirectToAction("Details", new { Id = answer.QuestionId });
+            }
+            else if (question.Locked)
             {
                 return RedirectToAction("Details", new { Id = answer.QuestionId, Message = "The question is locked!" });
             }
@@ -230,7 +229,7 @@ namespace iep_project.Controllers
             return HttpNotFound();
         }
 
-        [Authorize(Roles ="Agent, Admin")]
+        [Authorize(Roles = "Agent, Admin")]
         public ActionResult Unlock(Guid QuestionId)
         {
             Question question = this.getQuestionById(QuestionId);
@@ -271,11 +270,42 @@ namespace iep_project.Controllers
                 db.Answers.Remove(answer);
                 db.SaveChanges();
                 return RedirectToAction("Details", new { Id = answer.QuestionId });
-            } else if (User.Identity.Name == answer.ApplicationUser.UserName && question.Locked)
+            }
+            else if (User.Identity.Name == answer.ApplicationUser.UserName && question.Locked)
             {
                 return RedirectToAction("Details", new { Id = answer.QuestionId, Message = "The question is locked!" });
             }
             return HttpNotFound();
+        }
+
+        private ActionResult RateAnswer(Guid AnswerId, int rating)
+        {
+            Answer answer = db.Answers.Include(a => a.ApplicationUser).Where(a => a.Id == AnswerId).First();
+            if (db.UserAnswers.Any(ua => ua.AnswerId == AnswerId && ua.UserName == User.Identity.Name))
+            {
+                return RedirectToAction("Details", new { id = answer.QuestionId, message = "You already rated this answer!" });
+            }
+            UserAnswer userAnswer = new UserAnswer()
+            {
+                AnswerId = AnswerId,
+                UserName = User.Identity.Name
+            };
+            db.UserAnswers.Add(userAnswer);
+            answer.NumberLikes += rating;
+            db.SaveChanges();
+            return RedirectToAction("Details", new { id = answer.QuestionId });
+        }
+
+        [Authorize]
+        public ActionResult Like(Guid AnswerId)
+        {
+            return RateAnswer(AnswerId, 1);
+        }
+
+        [Authorize]
+        public ActionResult Dislike(Guid AnswerId)
+        {
+            return RateAnswer(AnswerId, -1);
         }
 
         protected override void Dispose(bool disposing)

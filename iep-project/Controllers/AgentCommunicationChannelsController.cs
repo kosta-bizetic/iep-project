@@ -45,6 +45,8 @@ namespace iep_project.Controllers
             {
                 return HttpNotFound();
             }
+            ViewBag.Messages = db.CommunicationChannelMessages.Where(ccm => ccm.ChannelId == id)
+                .Include(ccm => ccm.ApplicationUser).OrderBy(ccm => ccm.Created).ToArray();
             return View(communicationChannel);
         }
 

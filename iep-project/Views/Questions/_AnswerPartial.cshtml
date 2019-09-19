@@ -2,7 +2,14 @@
 
 <div class="panel panel-info">
     <div class="panel-heading">
-        @Html.DisplayFor(model => model.ApplicationUser.Name)
+
+        <div class="pull-left">
+            @Html.DisplayFor(model => model.ApplicationUser.Name)
+        </div>
+        <div class="pull-right">
+            Rating: @Html.DisplayFor(model => model.NumberLikes)
+        </div>
+        <br />
     </div>
     <div class="panel-body">
         @if (Model.ParentAnswer != null)
@@ -22,12 +29,24 @@
         @Html.DisplayFor(model => model.Text)
     </div>
     <div class="panel-footer">
-        @Html.DisplayFor(model => model.Created)
-        @Html.ActionLink("Reply", "CreateAnswer", new { QuestionId = Model.QuestionId, AnswerId = Model.Id })
-        @if (User.Identity.Name == Model.ApplicationUser.UserName || User.IsInRole("Admin"))
-        {
-            @Html.ActionLink("Delete", "DeleteAnswer", new { AnswerId = Model.Id })
-        }
+        
+        <div class="pull-left">
+            @Html.DisplayFor(model => model.Created)
+        </div>
+
+        <div class="pull-right">
+            @Html.ActionLink("Like", "Like", new { AnswerId = Model.Id })
+            @Html.Raw(" | ")
+            @Html.ActionLink("Dislike", "Dislike", new { AnswerId = Model.Id })
+            @Html.Raw(" | ")
+            @Html.ActionLink("Reply", "CreateAnswer", new { QuestionId = Model.QuestionId, AnswerId = Model.Id })
+            @if (User.Identity.Name == Model.ApplicationUser.UserName || User.IsInRole("Admin"))
+            {
+                @Html.Raw(" | ")
+                @Html.ActionLink("Delete", "DeleteAnswer", new { AnswerId = Model.Id })
+            }
+        </div>
+        <br />
 
     </div>
 </div>

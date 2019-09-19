@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Web;
 
 namespace iep_project.Models
 {
@@ -27,13 +25,8 @@ namespace iep_project.Models
         [ScaffoldColumn(false)]
         public DateTime Created { get; set; }
 
-        [NotMapped]
         [ScaffoldColumn(false)]
-        public int NumberLikes { get; set; }
-
-        [NotMapped]
-        [ScaffoldColumn(false)]
-        public int NumberDislikes { get; set; }
+        public int NumberLikes { get; set; } = 0;
 
         [ScaffoldColumn(false)]
         public string ApplicationUserId { get; set; }

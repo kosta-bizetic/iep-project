@@ -57,5 +57,9 @@ namespace iep_project.Models
         public System.Data.Entity.DbSet<iep_project.Models.CommunicationChannel> CommunicationChannels { get; set; }
 
         public System.Data.Entity.DbSet<iep_project.Models.AgentChannel> AgentChannels { get; set; }
+
+        public System.Data.Entity.DbSet<iep_project.Models.CommunicationChannelMessage> CommunicationChannelMessages { get; set; }
+
+        public System.Data.Entity.DbSet<iep_project.Models.UserAnswer> UserAnswers { get; set; }
     }
 }

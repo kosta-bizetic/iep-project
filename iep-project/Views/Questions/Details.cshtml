@@ -30,26 +30,33 @@
     <div class="panel-body">
         @if (Model.ImagePath != null)
         {
-            <img src="@Url.Content(Model.ImagePath)" class="center-block"/><br />
+            <img src="@Url.Content(Model.ImagePath)" class="center-block" alt=""/><br />
         }
         @Html.DisplayFor(model => model.Text)
     </div>
     <div class="panel-footer">
-        @Html.DisplayFor(model => model.Created)
-        @Html.ActionLink("Reply", "CreateAnswer", new { QuestionId = Model.Id })
-        @if (Model.Locked == false && User.Identity.Name == Model.ApplicationUser.UserName)
-        {
-
-            @Html.ActionLink("Lock", "Lock", new { QuestionId = Model.Id })
-        }
-        @if (Model.Locked == true && (User.IsInRole("Admin") || User.IsInRole("Agent")))
-        {
-            @Html.ActionLink("Unlock", "Unlock", new { QuestionId = Model.Id })
-        }
-        @if (User.Identity.Name == Model.ApplicationUser.UserName || User.IsInRole("Admin"))
-        {
-            @Html.ActionLink("Delete", "Delete", new { Id = Model.Id })
-        }
+        <div class="pull-left">
+            @Html.DisplayFor(model => model.Created)
+        </div>
+        <div class="pull-right">
+            @Html.ActionLink("Reply", "CreateAnswer", new { QuestionId = Model.Id })
+            @if (Model.Locked == false && User.Identity.Name == Model.ApplicationUser.UserName)
+            {
+                @Html.Raw(" | ")
+                @Html.ActionLink("Lock", "Lock", new { QuestionId = Model.Id })
+            }
+            @if (Model.Locked == true && (User.IsInRole("Admin") || User.IsInRole("Agent")))
+            {
+                @Html.Raw(" | ")
+                @Html.ActionLink("Unlock", "Unlock", new { QuestionId = Model.Id })
+            }
+            @if (User.Identity.Name == Model.ApplicationUser.UserName || User.IsInRole("Admin"))
+            {
+                @Html.Raw(" | ")
+                @Html.ActionLink("Delete", "Delete", new { Id = Model.Id })
+            }
+        </div>
+        <br />
     </div>
 </div>
 

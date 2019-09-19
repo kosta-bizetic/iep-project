@@ -1,9 +1,12 @@
-﻿using iep_project.Models;
+﻿using iep_project.Hubs;
+using iep_project.Models;
+using Microsoft.AspNet.SignalR;
 using System;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
 using System.Web.Mvc;
+using AuthorizeAttribute = System.Web.Mvc.AuthorizeAttribute;
 
 namespace iep_project.Controllers
 {
@@ -38,6 +41,8 @@ namespace iep_project.Controllers
             {
                 return HttpNotFound();
             }
+            ViewBag.Messages = db.CommunicationChannelMessages.Where(ccm => ccm.ChannelId == id)
+                .Include(ccm => ccm.ApplicationUser).OrderBy(ccm => ccm.Created).ToArray();
             return View(communicationChannel);
         }
 
@@ -75,6 +80,33 @@ namespace iep_project.Controllers
             }
 
             return View(communicationChannel);
+        }
+
+        public ActionResult Close(Guid id)
+        {
+            var communicationChannel = db.CommunicationChannels.Find(id);
+            if (communicationChannel == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            var user = db.Users.Where(u => u.UserName == User.Identity.Name).First();
+            if (communicationChannel.ApplicationUserId != user.Id)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            communicationChannel.Open = false;
+            communicationChannel.NumberOfAgents = 0;
+            var AgentChannels = db.AgentChannels.Where(ac => ac.ChannelId == id);
+            db.AgentChannels.RemoveRange(AgentChannels);
+            db.SaveChanges();
+
+            var context = GlobalHost.ConnectionManager.GetHubContext<CommunicationHub>();
+            var commHub = new CommunicationHub();
+
+            context.Clients.Group(id.ToString()).addNewMessage("This channel closed.");
+
+            return RedirectToAction("Index");
+
         }
 
         protected override void Dispose(bool disposing)

@@ -35,9 +35,10 @@
                         }
                         else if (User.IsInRole("Admin"))
                         {
-                            < li > @Html.ActionLink("Categories", "Index", "Categories") </ li >
-                            < li > @Html.ActionLink("Offers", "Index", "Offers") </ li >
-                            < li > @Html.ActionLink("Pricelist", "Index", "Prices") </ li >
+                            <li> @Html.ActionLink("Categories", "Index", "Categories") </li>
+                            <li> @Html.ActionLink("Offers", "Index", "Offers") </li>
+                            <li> @Html.ActionLink("Pricelist", "Index", "Prices") </li>
+                            <li> @Html.ActionLink("Users", "Index", "ApplicationUsers") </li>
                         }
                     }
                 </ul>

@@ -8,12 +8,15 @@
 <h2>Communication Channel - @Html.DisplayFor(model => model.Title)</h2>
 
 <div class="container">
+    <ul id="discussion">
+        @foreach (var message in ViewBag.Messages)
+        {
+            <li><strong>@message.ApplicationUser.Name: </strong>@message.Message</li>
+        }
+    </ul>
     <input type="text" id="message" />
     <input type="button" id="sendmessage" value="Send" />
     <input type="hidden" id="channelId" value="@Model.Id" />
-    <ul id="discussion">
-
-    </ul>
 </div>
 
 <p>
@@ -29,8 +32,8 @@
         $(function () {
             var chat = $.connection.communicationHub;
 
-            chat.client.addNewMessage = function (message) {
-                $('#discussion').append('<li>' + htmlEncode(message) + '</li>');
+            chat.client.addNewMessage = function (user, message) {
+                $('#discussion').append('<li><strong>' + htmlEncode(user) + ': </strong>' + htmlEncode(message) + '</li>');
             };
 
             $('#message').focus();
@@ -41,7 +44,7 @@
 
                 $('#sendmessage').click(function () {
                     chat.server.send($('#channelId').val(), $('#message').val());
-                    $('#message').val().focus();
+                    $('#message').val('').focus();
                 });
             });
         });

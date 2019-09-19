@@ -10,9 +10,10 @@ namespace iep_project.Hubs
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
-        public void Hello()
+
+        public CommunicationHub() : base()
         {
-            Clients.All.hello();
+
         }
 
         protected bool CurrentUserMemberOfChannel(Guid id)
@@ -28,8 +29,23 @@ namespace iep_project.Hubs
 
             if (!CurrentUserMemberOfChannel(channelId)) return;
 
+            CommunicationChannel communicationChannel = db.CommunicationChannels.Where(ch => ch.Id == channelId).Include(ch => ch.ApplicationUser).First();
+            if (communicationChannel.Open == false) return;
+
             var user = db.Users.Where(u => u.UserName == Context.User.Identity.Name).First();
-            Clients.Group(channelId.ToString()).addNewMessage(user.Name + message);
+
+            CommunicationChannelMessage communicationChannelMessage = new CommunicationChannelMessage()
+            {
+                ApplicationUserId = user.Id,
+                ChannelId = channelId,
+                Created = DateTime.Now,
+                Message = message,
+                Id = Guid.NewGuid()
+            };
+            db.CommunicationChannelMessages.Add(communicationChannelMessage);
+            db.SaveChanges();
+
+            Clients.Group(channelId.ToString()).addNewMessage(user.Name, message);
         }
 
         public void JoinChannel(Guid channelId)
