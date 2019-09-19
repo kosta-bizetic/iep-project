@@ -10,6 +10,7 @@ namespace iep_project
         {
             ConfigureAuth(app);
             PayPalConfiguration.ConfigurePayPal();
+            app.MapSignalR();
         }
     }
 }

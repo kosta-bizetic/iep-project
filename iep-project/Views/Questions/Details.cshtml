@@ -28,7 +28,7 @@
         @Html.DisplayFor(model => model.ApplicationUser.Name)
     </div>
     <div class="panel-body">
-        @if (Model.ImagePath != "")
+        @if (Model.ImagePath != null)
         {
             <img src="@Url.Content(Model.ImagePath)" class="center-block"/><br />
         }

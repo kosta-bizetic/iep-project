@@ -1,10 +1,9 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using System.ComponentModel;
 using System.Data.Entity;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace iep_project.Models
 {
@@ -54,5 +53,9 @@ namespace iep_project.Models
         public System.Data.Entity.DbSet<iep_project.Models.Price> Prices { get; set; }
 
         public System.Data.Entity.DbSet<iep_project.Models.Order> Orders { get; set; }
+
+        public System.Data.Entity.DbSet<iep_project.Models.CommunicationChannel> CommunicationChannels { get; set; }
+
+        public System.Data.Entity.DbSet<iep_project.Models.AgentChannel> AgentChannels { get; set; }
     }
 }
